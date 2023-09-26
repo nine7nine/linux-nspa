@@ -8628,7 +8628,21 @@ static void check_preempt_wakeup_fair(struct rq *rq, struct task_struct *p, int 
 	update_curr(cfs_rq);
 
 	/*
-	 * XXX pick_eevdf(cfs_rq) != se ?
+	 * If @p has a shorter slice than current and @p is eligible, override
+	 * current's RESPECT_SLICE in order to allow preemption.
+	 *
+	 * Note that even if @p does not turn out to be the most eligible
+	 * task at this moment, current's slice protection will be lost.
+	 */
+	if (sched_feat(PREEMPT_SHORT) && pse->slice < se->slice &&
+	    entity_eligible(cfs_rq, pse) &&
+	    (!entity_eligible(cfs_rq, se) ||
+	     (s64)(pse->deadline - se->deadline) < 0) &&
+	    se->vlag == se->deadline)
+		se->vlag = se->deadline + 1;
+
+	/*
+	 * If @p has become the most eligible task, force preemption.
 	 */
 	if (pick_eevdf(cfs_rq) == pse)
 		goto preempt;
