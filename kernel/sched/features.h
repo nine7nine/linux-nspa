@@ -10,10 +10,15 @@ SCHED_FEAT(PLACE_LAG, true)
  */
 SCHED_FEAT(PLACE_DEADLINE_INITIAL, true)
 /*
- * Inhibit (wakeup) preemption until the current task has either matched the
- * 0-lag point or until is has exhausted it's slice.
+ * Inhibit preemption until the current task has exhausted it's slice.
  */
-SCHED_FEAT(RUN_TO_PARITY, true)
+SCHED_FEAT(RESPECT_SLICE, true)
+/*
+ * Relax RESPECT_SLICE and only protect current until 0-lag. Notably this can
+ * mean no protection at all if a newly placed task moves avg_vruntime left of
+ * current.
+ */
+SCHED_FEAT(RUN_TO_PARITY, false)
 
 /*
  * Prefer to schedule the task we woke last (assuming it failed
